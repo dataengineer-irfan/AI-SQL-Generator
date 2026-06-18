@@ -4,6 +4,10 @@ from kaggle_integration.dataset_context_builder import (
     DatasetContextBuilder
 )
 
+from correction.sql_auto_corrector import (
+    SQLAutoCorrector
+)
+
 
 class EnhancedSQLGenerator:
 
@@ -15,6 +19,10 @@ class EnhancedSQLGenerator:
 
         self.dataset_context = (
             DatasetContextBuilder()
+        )
+
+        self.corrector = (
+            SQLAutoCorrector()
         )
 
     def generate(
@@ -43,7 +51,12 @@ QUESTION
 {question}
 """
 
-        return self.sql_generator.generate(
-            question=question,
-            schema_context=full_context
+        sql = self.sql_generator.generate(
+            question
         )
+
+        sql = self.corrector.correct(
+            sql
+        )
+
+        return sql
