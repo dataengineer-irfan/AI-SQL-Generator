@@ -222,3 +222,178 @@ Dataset Execution:
 * Working
 
 Ready for Batch 8.
+# Batch 9 – Streamlit User Interface
+
+**Status:** ✅ Completed
+
+## Objective
+
+Build a user-friendly web interface that allows users to ask questions in natural language and receive AI-generated SQL queries.
+
+## Features Implemented
+
+* Interactive Streamlit dashboard
+* Natural language question input
+* AI-powered SQL generation
+* REST API integration
+* Display generated SQL
+* Display SQL generation time
+* Simple and responsive interface
+* End-to-end integration with the SQL generation pipeline
+
+## Project Files
+
+```
+ui/
+│── streamlit_app.py
+│── api_client.py
+
+test_streamlit.py
+```
+
+## Workflow
+
+```
+User Question
+      │
+      ▼
+Streamlit UI
+      │
+      ▼
+REST API
+      │
+      ▼
+Enhanced SQL Generator
+      │
+      ▼
+Generated SQL
+      │
+      ▼
+Display in Browser
+```
+
+## Testing
+
+Test Command:
+
+```bash
+python test_streamlit.py
+```
+
+Example Input:
+
+```text
+Top 10 customers by sales
+```
+
+Example Output:
+
+```python
+{
+    "question": "Top 10 customers by sales",
+    "sql": "SELECT c.CUSTOMERNAME, SUM(s.SALES) AS TOTAL_SALES ...",
+    "execution_time": 0.866
+}
+```
+
+## Outcome
+
+The Streamlit interface successfully communicates with the REST API, generates SQL from natural language questions, and displays the generated SQL along with execution time.
+
+**Status:** Successfully Completed ✅
+
+# Batch 10 – SQL Validation & Auto-Correction
+
+**Status:** ✅ Completed
+
+### Features Implemented
+
+* Oracle SQL validation
+* Dataset SQL validation
+* Table existence validation
+* Column existence validation
+* Alias validation
+* Oracle keyword alias detection
+* Dataset-specific validator
+* Separate Oracle and Dataset validation pipelines
+
+### Testing Completed
+
+* Oracle validation
+* Dataset validation
+* Invalid table detection
+* Invalid column detection
+* Invalid alias detection
+* Oracle keyword alias detection
+
+---
+
+# Batch 11 – SQL Auto-Correction
+
+**Status:** ✅ Completed
+
+### Features Implemented
+
+* Automatic dataset table correction
+* Automatic dataset column correction
+* Fuzzy matching using `difflib`
+* Partial word matching
+* Prefix matching
+* Exact matching
+* Multi-pass SQL correction
+* Intelligent primary table detection
+* Safe replacement of columns in `SELECT` and `GROUP BY` clauses
+* Automatic repair of common SQL typos before execution
+
+### Testing Completed
+
+Input SQL:
+
+```sql
+SELECT CUSTOMER,
+SUM(SALES)
+FROM SALES_DATA_SAMPL
+GROUP BY CUSTOMER
+```
+
+Corrected SQL:
+
+```sql
+SELECT CUSTOMERNAME,
+SUM(SALES)
+FROM SALES_DATA_SAMPLE
+GROUP BY CUSTOMERNAME
+```
+
+### Project Progress
+
+| Batch    | Status      |
+| -------- | ----------- |
+| Batch 1  | ✅ Completed |
+| Batch 2  | ✅ Completed |
+| Batch 3  | ✅ Completed |
+| Batch 4  | ✅ Completed |
+| Batch 5  | ✅ Completed |
+| Batch 6  | ✅ Completed |
+| Batch 7  | ✅ Completed |
+| Batch 8  | ✅ Completed |
+| Batch 9  | ✅ Completed |
+| Batch 10 | ✅ Completed |
+| Batch 11 | ✅ Completed |
+
+### Current Capabilities
+
+* Oracle schema extraction
+* RAG-based schema retrieval
+* Dataset metadata indexing
+* Dataset RAG retrieval
+* SQL generation using Groq
+* SQL execution on Oracle
+* SQL execution on CSV datasets
+* REST API
+* Streamlit UI
+* SQL validation
+* Dataset validation
+* Alias validation
+* Automatic SQL correction
+* Intelligent dataset-aware SQL generation
