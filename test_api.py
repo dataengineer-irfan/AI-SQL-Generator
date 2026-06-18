@@ -7,4 +7,6 @@ response = requests.post(
     }
 )
 
-print(response.json())
+print("Status Code:", response.status_code)
+print("Response:")
+print(response.text)

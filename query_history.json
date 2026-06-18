@@ -1,0 +1,14 @@
+[
+    {
+        "timestamp": "2026-06-18 20:38:21",
+        "question": "Sales by Country",
+        "sql": "\nSELECT COUNTRY,\nSUM(SALES)\nFROM SALES_DATA_SAMPLE\nGROUP BY COUNTRY\n",
+        "execution_time": 0.48
+    },
+    {
+        "timestamp": "2026-06-18 20:38:21",
+        "question": "Top Customers",
+        "sql": "\nSELECT CUSTOMERNAME,\nSUM(SALES)\nFROM SALES_DATA_SAMPLE\nGROUP BY CUSTOMERNAME\n",
+        "execution_time": 0.72
+    }
+]

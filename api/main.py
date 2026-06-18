@@ -9,12 +9,23 @@ from generation.enhanced_sql_generator import (
     EnhancedSQLGenerator
 )
 
+from execution.dataset_sql_executor import (
+    DatasetSQLExecutor
+)
+
 app = FastAPI(
     title="AI SQL Generator",
     version="1.0"
 )
 
 generator = EnhancedSQLGenerator()
+
+executor = DatasetSQLExecutor()
+
+DATASET = (
+    "datasets/sample-sales-data/"
+    "sales_data_sample.csv"
+)
 
 
 @app.get("/")
@@ -38,13 +49,28 @@ def generate_sql(request: SQLRequest):
         ""
     )
 
+    results = executor.execute(
+        sql,
+        DATASET
+    )
+
     elapsed = round(
         time.time() - start,
         3
     )
 
     return SQLResponse(
+
         question=request.question,
+
         sql=sql,
-        execution_time=elapsed
+
+        execution_time=elapsed,
+
+        row_count=len(results),
+
+        results=results.to_dict(
+            orient="records"
+        )
+
     )
