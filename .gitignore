@@ -1,18 +1,46 @@
-.venv/
+# Python
 __pycache__/
 *.pyc
+*.pyo
 
+# Virtual Environment
+.venv/
+
+# Environment
 .env
 .env.*
 
+# Logs
+logs/
+*.log
+
+# Vector Store
 vector_store/
 *.faiss
 *.index
 *.pkl
 
-*.log
+# Generated Files
+results.csv
+query_history.json
 
+# IDE
 .vscode/
 .idea/
 
+# Streamlit
+.streamlit/
+
+# Test Cache
+.pytest_cache/
+.coverage
+
+# OS Files
+Thumbs.db
+.DS_Store
+
+# Datasets
 datasets/*.zip
+
+# Docker
+docker-compose.override.yml

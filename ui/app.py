@@ -1,7 +1,21 @@
-import streamlit as st
-import requests
+import os
+
 import pandas as pd
 import plotly.express as px
+import requests
+import streamlit as st
+
+# --------------------------------------------------
+# Configuration
+# --------------------------------------------------
+
+API_URL = os.getenv(
+    "API_URL",
+    "http://127.0.0.1:8000"
+)
+
+GENERATE_URL = f"{API_URL}/generate"
+HEALTH_URL = f"{API_URL}/health"
 
 st.set_page_config(
     page_title="AI SQL Generator",
@@ -9,9 +23,57 @@ st.set_page_config(
     layout="wide"
 )
 
-# -----------------------------
+# --------------------------------------------------
+# Sidebar
+# --------------------------------------------------
+
+with st.sidebar:
+
+    st.title("🤖 AI SQL Generator")
+
+    st.markdown("---")
+
+    st.subheader("Features")
+
+    st.success("RAG Search")
+    st.success("Oracle SQL")
+    st.success("FastAPI")
+    st.success("Groq LLM")
+    st.success("Interactive Charts")
+    st.success("CSV Export")
+
+    st.markdown("---")
+
+    st.subheader("API Status")
+
+    try:
+
+        health = requests.get(
+            HEALTH_URL,
+            timeout=5
+        )
+
+        if health.status_code == 200:
+
+            st.success("🟢 API Online")
+
+        else:
+
+            st.error("🔴 API Unhealthy")
+
+    except Exception:
+
+        st.error("🔴 API Offline")
+
+    st.markdown("---")
+
+    st.caption("API Base URL")
+
+    st.code(API_URL)
+
+# --------------------------------------------------
 # Title
-# -----------------------------
+# --------------------------------------------------
 
 st.title("🤖 AI SQL Generator")
 
@@ -19,68 +81,105 @@ st.write(
     "Generate Oracle SQL using Natural Language."
 )
 
-# -----------------------------
+# --------------------------------------------------
 # User Question
-# -----------------------------
+# --------------------------------------------------
 
 question = st.text_area(
     "Enter your question",
-    height=120
+    height=120,
+    placeholder="Example: Show total sales by country"
 )
 
-# -----------------------------
+# --------------------------------------------------
 # Generate SQL
-# -----------------------------
+# --------------------------------------------------
 
-if st.button("Generate SQL"):
+if st.button(
+    "🚀 Generate SQL",
+    width="stretch"
+):
 
-    if question.strip() == "":
+    if not question.strip():
 
-        st.warning("Please enter a question.")
+        st.warning(
+            "Please enter a question."
+        )
 
     else:
 
-        with st.spinner("Generating SQL..."):
+        with st.spinner(
+            "Generating SQL..."
+        ):
 
             try:
 
                 response = requests.post(
-                    "http://127.0.0.1:8000/generate",
+                    GENERATE_URL,
                     json={
                         "question": question
-                    }
+                    },
+                    timeout=120
                 )
 
                 if response.status_code == 200:
 
-                    st.session_state["result"] = response.json()
+                    st.session_state["result"] = (
+                        response.json()
+                    )
 
                 else:
 
                     st.error(
-                        f"API Error : {response.text}"
+                        f"API Error ({response.status_code})"
                     )
 
-            except Exception as e:
+                    st.code(
+                        response.text
+                    )
 
-                st.error(str(e))
+            except requests.exceptions.Timeout:
 
-# -----------------------------
+                st.error(
+                    "The request timed out."
+                )
+
+            except requests.exceptions.ConnectionError:
+
+                st.error(
+                    "Unable to connect to the API."
+                )
+
+            except Exception as ex:
+
+                st.error(
+                    str(ex)
+                )
+
+# --------------------------------------------------
 # Display Results
-# -----------------------------
+# --------------------------------------------------
 
 if "result" in st.session_state:
 
     result = st.session_state["result"]
 
-    st.success("SQL Generated Successfully")
+    st.success(
+        "SQL Generated Successfully"
+    )
 
-    st.subheader("Generated SQL")
+    # ----------------------------------------------
+
+    st.subheader(
+        "Generated SQL"
+    )
 
     st.code(
         result["sql"],
         language="sql"
     )
+
+    # ----------------------------------------------
 
     col1, col2 = st.columns(2)
 
@@ -98,24 +197,30 @@ if "result" in st.session_state:
             result["row_count"]
         )
 
+    # ----------------------------------------------
+
     df = pd.DataFrame(
         result["results"]
     )
 
-    st.subheader("Query Results")
+    st.subheader(
+        "Query Results"
+    )
 
     st.dataframe(
         df,
-        use_container_width=True
+        width="stretch"
     )
 
-    # -----------------------------
-    # Chart
-    # -----------------------------
+    # ----------------------------------------------
+    # Visualization
+    # ----------------------------------------------
 
     if len(df.columns) >= 2:
 
-        st.subheader("Visualization")
+        st.subheader(
+            "Visualization"
+        )
 
         chart_type = st.selectbox(
             "Select Chart Type",
@@ -138,11 +243,6 @@ if "result" in st.session_state:
                 title="Bar Chart"
             )
 
-            st.plotly_chart(
-                fig,
-                use_container_width=True
-            )
-
         elif chart_type == "Line Chart":
 
             fig = px.line(
@@ -153,12 +253,7 @@ if "result" in st.session_state:
                 title="Line Chart"
             )
 
-            st.plotly_chart(
-                fig,
-                use_container_width=True
-            )
-
-        elif chart_type == "Pie Chart":
+        else:
 
             fig = px.pie(
                 df,
@@ -167,57 +262,43 @@ if "result" in st.session_state:
                 title="Pie Chart"
             )
 
-            st.plotly_chart(
-                fig,
-                use_container_width=True
-            )
+        st.plotly_chart(
+            fig,
+            width="stretch"
+        )
 
-    # -----------------------------
-    # CSV Download
-    # -----------------------------
+    # ----------------------------------------------
+    # Export
+    # ----------------------------------------------
 
-    st.subheader("Export")
+    st.subheader(
+        "Export Results"
+    )
 
     csv = df.to_csv(
         index=False
-    ).encode("utf-8")
+    ).encode(
+        "utf-8"
+    )
 
     st.download_button(
         label="⬇ Download CSV",
         data=csv,
         file_name="results.csv",
-        mime="text/csv"
+        mime="text/csv",
+        width="stretch"
     )
 
-# -----------------------------
-# Sidebar
-# -----------------------------
-
-with st.sidebar:
-
-    st.title("AI SQL Generator")
-
-    st.markdown("---")
-
-    st.subheader("Features")
-
-    st.write("✅ RAG")
-
-    st.write("✅ Dataset Search")
-
-    st.write("✅ Oracle SQL")
-
-    st.write("✅ FastAPI")
-
-    st.write("✅ Groq LLM")
-
-# -----------------------------
+# --------------------------------------------------
 # Example Questions
-# -----------------------------
+# --------------------------------------------------
 
-st.subheader("Example Questions")
+st.subheader(
+    "Example Questions"
+)
 
-st.markdown("""
+st.markdown(
+"""
 - Show total sales by country
 
 - Top 10 customers
@@ -235,4 +316,11 @@ st.markdown("""
 - Average sales by country
 
 - Orders by status
-""")
+
+- Total sales by year and country
+
+- Show customers from USA
+
+- Average sales per product line
+"""
+)
