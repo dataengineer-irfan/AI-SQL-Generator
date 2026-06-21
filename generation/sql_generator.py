@@ -16,6 +16,10 @@ class SQLGenerator:
 
     def _get_rag(self):
 
+        # RAG disabled for cloud deployment
+        if not settings.ENABLE_RAG:
+            return None
+
         if self.rag is None:
 
             from rag.rag_pipeline import RAGPipeline
@@ -34,29 +38,27 @@ class SQLGenerator:
 
             if settings.ENABLE_RAG:
 
-                schema_context = (
-                    self._get_rag().retrieve(
+                rag = self._get_rag()
+
+                if rag is not None:
+
+                    schema_context = rag.retrieve(
                         question,
                         top_k=4
                     )
-                )
 
             else:
 
                 schema_context = ""
 
-        prompt = (
-            PromptBuilder.build(
-                question,
-                schema_context
-            )
+        prompt = PromptBuilder.build(
+            question,
+            schema_context
         )
 
-        response = (
-            self.provider.generate(
-                prompt,
-                temperature=0.0
-            )
+        response = self.provider.generate(
+            prompt,
+            temperature=0.0
         )
 
         return SQLCleaner.clean(
