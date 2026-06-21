@@ -6,6 +6,7 @@ from fastapi import FastAPI, HTTPException
 from api.models.request_models import SQLRequest
 from api.models.response_models import SQLResponse
 
+from config.settings import settings
 from logging_system.json_logger import JSONLogger
 
 app = FastAPI(
@@ -16,7 +17,6 @@ app = FastAPI(
 
 logger = JSONLogger()
 
-# Lazy-loaded objects
 generator = None
 executor = None
 
@@ -24,6 +24,15 @@ DATASET = (
     "datasets/sample-sales-data/"
     "sales_data_sample.csv"
 )
+
+
+@app.on_event("startup")
+def startup():
+
+    print("=" * 60)
+    print("API STARTED")
+    print(f"ENABLE_RAG = {settings.ENABLE_RAG}")
+    print("=" * 60)
 
 
 def get_generator():
@@ -37,11 +46,15 @@ def get_generator():
             module="api"
         )
 
+        print("Creating EnhancedSQLGenerator...")
+
         from generation.enhanced_sql_generator import (
             EnhancedSQLGenerator
         )
 
         generator = EnhancedSQLGenerator()
+
+        print("EnhancedSQLGenerator created.")
 
         logger.info(
             "EnhancedSQLGenerator created",
@@ -62,11 +75,15 @@ def get_executor():
             module="api"
         )
 
+        print("Creating DatasetSQLExecutor...")
+
         from execution.dataset_sql_executor import (
             DatasetSQLExecutor
         )
 
         executor = DatasetSQLExecutor()
+
+        print("DatasetSQLExecutor created.")
 
         logger.info(
             "DatasetSQLExecutor created",
@@ -116,21 +133,25 @@ def generate_sql(request: SQLRequest):
 
     try:
 
+        print("=" * 60)
+        print("POST /generate received")
+        print(f"Question: {request.question}")
+
         logger.info(
             "Generate request received",
             module="api",
             question=request.question
         )
 
-        logger.info(
-            "Loading generator",
-            module="api"
-        )
+        print("STEP 1 - Loading generator")
 
         sql = get_generator().generate(
             request.question,
             ""
         )
+
+        print("STEP 2 - SQL generated")
+        print(sql)
 
         logger.info(
             "SQL generated",
@@ -138,15 +159,14 @@ def generate_sql(request: SQLRequest):
             sql=sql
         )
 
-        logger.info(
-            "Loading executor",
-            module="api"
-        )
+        print("STEP 3 - Loading executor")
 
         results = get_executor().execute(
             sql,
             DATASET
         )
+
+        print("STEP 4 - SQL executed")
 
         elapsed = round(
             time.time() - start,
@@ -170,6 +190,8 @@ def generate_sql(request: SQLRequest):
             )
         )
 
+        print("STEP 5 - Returning response")
+
         logger.info(
             "Response returned successfully",
             module="api"
@@ -180,13 +202,13 @@ def generate_sql(request: SQLRequest):
     except Exception as ex:
 
         print("\n========== EXCEPTION ==========")
-        print(traceback.format_exc())
+        traceback.print_exc()
         print("========== END EXCEPTION ==========\n")
 
         logger.error(
             "API execution failed",
-            module="errors",
             exception=ex,
+            module="errors",
             question=request.question
         )
 
