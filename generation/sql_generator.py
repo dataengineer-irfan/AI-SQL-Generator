@@ -3,8 +3,6 @@ from generation.sql_cleaner import SQLCleaner
 
 from providers.groq_provider import GroqProvider
 
-from rag.rag_pipeline import RAGPipeline
-
 
 class SQLGenerator:
 
@@ -12,7 +10,17 @@ class SQLGenerator:
 
         self.provider = GroqProvider()
 
-        self.rag = RAGPipeline()
+        self.rag = None
+
+    def _get_rag(self):
+
+        if self.rag is None:
+
+            from rag.rag_pipeline import RAGPipeline
+
+            self.rag = RAGPipeline()
+
+        return self.rag
 
     def generate(
         self,
@@ -23,7 +31,7 @@ class SQLGenerator:
         if not schema_context:
 
             schema_context = (
-                self.rag.retrieve(
+                self._get_rag().retrieve(
                     question,
                     top_k=4
                 )

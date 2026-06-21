@@ -5,17 +5,7 @@ from fastapi import FastAPI, HTTPException
 from api.models.request_models import SQLRequest
 from api.models.response_models import SQLResponse
 
-from generation.enhanced_sql_generator import (
-    EnhancedSQLGenerator
-)
-
-from execution.dataset_sql_executor import (
-    DatasetSQLExecutor
-)
-
-from logging_system.json_logger import (
-    JSONLogger
-)
+from logging_system.json_logger import JSONLogger
 
 app = FastAPI(
     title="AI SQL Generator",
@@ -23,16 +13,46 @@ app = FastAPI(
     description="Enterprise AI Text-to-SQL Platform"
 )
 
-generator = EnhancedSQLGenerator()
-
-executor = DatasetSQLExecutor()
-
 logger = JSONLogger()
+
+# Lazy-loaded objects
+generator = None
+executor = None
 
 DATASET = (
     "datasets/sample-sales-data/"
     "sales_data_sample.csv"
 )
+
+
+def get_generator():
+
+    global generator
+
+    if generator is None:
+
+        from generation.enhanced_sql_generator import (
+            EnhancedSQLGenerator
+        )
+
+        generator = EnhancedSQLGenerator()
+
+    return generator
+
+
+def get_executor():
+
+    global executor
+
+    if executor is None:
+
+        from execution.dataset_sql_executor import (
+            DatasetSQLExecutor
+        )
+
+        executor = DatasetSQLExecutor()
+
+    return executor
 
 
 @app.get("/")
@@ -81,7 +101,7 @@ def generate_sql(request: SQLRequest):
             question=request.question
         )
 
-        sql = generator.generate(
+        sql = get_generator().generate(
             request.question,
             ""
         )
@@ -92,7 +112,7 @@ def generate_sql(request: SQLRequest):
             sql=sql
         )
 
-        results = executor.execute(
+        results = get_executor().execute(
             sql,
             DATASET
         )
