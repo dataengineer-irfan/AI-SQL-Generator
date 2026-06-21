@@ -1,26 +1,35 @@
-from rag.embeddings import EmbeddingModel
-from rag.vector_store import VectorStore
-
 import numpy as np
+
+from config.settings import settings
+from rag.vector_store import VectorStore
 
 
 class DatasetRetriever:
 
     def __init__(self):
 
-        self.embedding_model = (
-            EmbeddingModel()
-        )
+        self.vector_store = VectorStore()
 
-        self.vector_store = (
-            VectorStore()
-        )
+        if settings.ENABLE_RAG:
+
+            from rag.embeddings import EmbeddingModel
+
+            self.embedding_model = EmbeddingModel()
+
+        else:
+
+            self.embedding_model = None
 
     def retrieve(
         self,
         question: str,
         top_k: int = 3
     ):
+
+        # Skip semantic retrieval when RAG is disabled
+        if not settings.ENABLE_RAG:
+
+            return []
 
         query_embedding = (
             self.embedding_model.embed_query(
@@ -52,6 +61,7 @@ class DatasetRetriever:
                 idx >= 0 and
                 idx < len(docs)
             ):
+
                 results.append(
                     docs[idx]
                 )
