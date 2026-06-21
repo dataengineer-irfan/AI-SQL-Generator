@@ -15,10 +15,10 @@ logs/
 *.log
 
 # Vector Store
-vector_store/
-*.faiss
-*.index
-*.pkl
+# vector_store/
+#*.faiss
+#*.index
+# *.pkl
 
 # Generated Files
 results.csv
