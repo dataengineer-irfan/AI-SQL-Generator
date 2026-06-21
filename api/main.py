@@ -39,8 +39,8 @@ DATASET = (
 def home():
 
     logger.info(
-        "api",
-        "Home endpoint called"
+        "Home endpoint called",
+        module="api"
     )
 
     return {
@@ -54,8 +54,8 @@ def home():
 def health():
 
     logger.info(
-        "api",
-        "Health endpoint called"
+        "Health endpoint called",
+        module="api"
     )
 
     return {
@@ -76,8 +76,8 @@ def generate_sql(request: SQLRequest):
     try:
 
         logger.info(
-            "api",
             "Generate request received",
+            module="api",
             question=request.question
         )
 
@@ -87,8 +87,8 @@ def generate_sql(request: SQLRequest):
         )
 
         logger.info(
-            "generator",
             "SQL generated",
+            module="generator",
             sql=sql
         )
 
@@ -103,8 +103,8 @@ def generate_sql(request: SQLRequest):
         )
 
         logger.info(
-            "execution",
             "SQL executed successfully",
+            module="execution",
             row_count=len(results),
             execution_time=elapsed
         )
@@ -126,8 +126,8 @@ def generate_sql(request: SQLRequest):
         )
 
         logger.info(
-            "api",
-            "Response returned successfully"
+            "Response returned successfully",
+            module="api"
         )
 
         return response
@@ -135,8 +135,8 @@ def generate_sql(request: SQLRequest):
     except Exception as ex:
 
         logger.error(
-            "errors",
             "API execution failed",
+            module="errors",
             exception=ex,
             question=request.question
         )
