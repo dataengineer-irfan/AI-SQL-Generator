@@ -1,3 +1,5 @@
+from config.settings import settings
+
 from generation.prompt_builder import PromptBuilder
 from generation.sql_cleaner import SQLCleaner
 
@@ -30,12 +32,18 @@ class SQLGenerator:
 
         if not schema_context:
 
-            schema_context = (
-                self._get_rag().retrieve(
-                    question,
-                    top_k=4
+            if settings.ENABLE_RAG:
+
+                schema_context = (
+                    self._get_rag().retrieve(
+                        question,
+                        top_k=4
+                    )
                 )
-            )
+
+            else:
+
+                schema_context = ""
 
         prompt = (
             PromptBuilder.build(

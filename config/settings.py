@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     # Logging
     LOG_LEVEL: str = "INFO"
     LOG_DIR: str = "logs"
+    ENABLE_RAG: bool = True
 
     # RAG
     TOP_K_SCHEMA: int = 5
