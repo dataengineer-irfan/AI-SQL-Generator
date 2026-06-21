@@ -1,21 +1,16 @@
-import re
 import difflib
+import re
+
+from config.settings import settings
 
 from validation.dataset_validator import DatasetValidator
-from validation.sql_validator import SQLValidator
 
 
 class SQLAutoCorrector:
 
     def __init__(self):
 
-        self.dataset_validator = (
-            DatasetValidator()
-        )
-
-        self.oracle_validator = (
-            SQLValidator()
-        )
+        self.dataset_validator = DatasetValidator()
 
         self.dataset_tables = (
             self.dataset_validator.tables
@@ -24,6 +19,27 @@ class SQLAutoCorrector:
         self.dataset_columns = (
             self.dataset_validator.columns
         )
+
+        self.oracle_validator = None
+
+        if (
+            settings.ORACLE_USER
+            and settings.ORACLE_PASSWORD
+        ):
+
+            try:
+
+                from validation.sql_validator import (
+                    SQLValidator
+                )
+
+                self.oracle_validator = (
+                    SQLValidator()
+                )
+
+            except Exception:
+
+                self.oracle_validator = None
 
     def _closest_match(
         self,
@@ -35,11 +51,9 @@ class SQLAutoCorrector:
 
         candidates = list(candidates)
 
-        # Exact match
         if word in candidates:
             return word
 
-        # Substring match
         for candidate in candidates:
 
             if word in candidate:
@@ -48,13 +62,11 @@ class SQLAutoCorrector:
             if candidate in word:
                 return candidate
 
-        # Prefix match
         for candidate in candidates:
 
             if candidate.startswith(word):
                 return candidate
 
-        # Fuzzy match
         matches = difflib.get_close_matches(
             word,
             candidates,
@@ -89,7 +101,6 @@ class SQLAutoCorrector:
         new_column
     ):
 
-        # Replace only inside SELECT clause
         select_match = re.search(
             r"SELECT(.*?)FROM",
             sql,
@@ -114,7 +125,6 @@ class SQLAutoCorrector:
                 new_select
             )
 
-        # Replace only inside GROUP BY clause
         group_match = re.search(
             r"GROUP\s+BY(.*?)(ORDER\s+BY|$)",
             sql,
@@ -161,10 +171,6 @@ class SQLAutoCorrector:
 
             for issue in validation["issues"]:
 
-                # --------------------------
-                # Fix table names
-                # --------------------------
-
                 if issue.startswith(
                     "Dataset table does not exist:"
                 ):
@@ -187,10 +193,6 @@ class SQLAutoCorrector:
                         corrected_sql,
                         flags=re.IGNORECASE
                     )
-
-                # --------------------------
-                # Fix column names
-                # --------------------------
 
                 elif issue.startswith(
                     "Unknown column:"

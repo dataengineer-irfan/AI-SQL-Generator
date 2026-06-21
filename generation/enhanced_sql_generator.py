@@ -13,22 +13,16 @@ class EnhancedSQLGenerator:
 
     def __init__(self):
 
-        self.sql_generator = (
-            SQLGenerator()
-        )
+        self.sql_generator = SQLGenerator()
 
-        self.dataset_context = (
-            DatasetContextBuilder()
-        )
+        self.dataset_context = DatasetContextBuilder()
 
-        self.corrector = (
-            SQLAutoCorrector()
-        )
+        self.corrector = SQLAutoCorrector()
 
     def generate(
         self,
         question,
-        schema_context
+        schema_context=""
     ):
 
         dataset_context = (
@@ -52,7 +46,8 @@ QUESTION
 """
 
         sql = self.sql_generator.generate(
-            question
+            question,
+            full_context
         )
 
         sql = self.corrector.correct(
