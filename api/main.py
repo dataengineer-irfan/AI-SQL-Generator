@@ -1,4 +1,5 @@
 import time
+import traceback
 
 from fastapi import FastAPI, HTTPException
 
@@ -31,11 +32,21 @@ def get_generator():
 
     if generator is None:
 
+        logger.info(
+            "Creating EnhancedSQLGenerator",
+            module="api"
+        )
+
         from generation.enhanced_sql_generator import (
             EnhancedSQLGenerator
         )
 
         generator = EnhancedSQLGenerator()
+
+        logger.info(
+            "EnhancedSQLGenerator created",
+            module="api"
+        )
 
     return generator
 
@@ -46,11 +57,21 @@ def get_executor():
 
     if executor is None:
 
+        logger.info(
+            "Creating DatasetSQLExecutor",
+            module="api"
+        )
+
         from execution.dataset_sql_executor import (
             DatasetSQLExecutor
         )
 
         executor = DatasetSQLExecutor()
+
+        logger.info(
+            "DatasetSQLExecutor created",
+            module="api"
+        )
 
     return executor
 
@@ -101,6 +122,11 @@ def generate_sql(request: SQLRequest):
             question=request.question
         )
 
+        logger.info(
+            "Loading generator",
+            module="api"
+        )
+
         sql = get_generator().generate(
             request.question,
             ""
@@ -110,6 +136,11 @@ def generate_sql(request: SQLRequest):
             "SQL generated",
             module="generator",
             sql=sql
+        )
+
+        logger.info(
+            "Loading executor",
+            module="api"
         )
 
         results = get_executor().execute(
@@ -130,19 +161,13 @@ def generate_sql(request: SQLRequest):
         )
 
         response = SQLResponse(
-
             question=request.question,
-
             sql=sql,
-
             execution_time=elapsed,
-
             row_count=len(results),
-
             results=results.to_dict(
                 orient="records"
             )
-
         )
 
         logger.info(
@@ -153,6 +178,10 @@ def generate_sql(request: SQLRequest):
         return response
 
     except Exception as ex:
+
+        print("\n========== EXCEPTION ==========")
+        print(traceback.format_exc())
+        print("========== END EXCEPTION ==========\n")
 
         logger.error(
             "API execution failed",

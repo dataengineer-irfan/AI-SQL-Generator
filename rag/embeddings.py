@@ -3,18 +3,25 @@ from sentence_transformers import SentenceTransformer
 
 class EmbeddingModel:
 
-    def __init__(self):
+    _model = None
 
-        self.model = SentenceTransformer(
-            "sentence-transformers/all-MiniLM-L6-v2"
-        )
+    @classmethod
+    def get_model(cls):
+
+        if cls._model is None:
+
+            cls._model = SentenceTransformer(
+                "sentence-transformers/all-MiniLM-L6-v2"
+            )
+
+        return cls._model
 
     def embed_documents(
         self,
         documents
     ):
 
-        return self.model.encode(
+        return self.get_model().encode(
             documents,
             convert_to_numpy=True
         )
@@ -24,12 +31,12 @@ class EmbeddingModel:
         query
     ):
 
-        return self.model.encode(
+        return self.get_model().encode(
             [query],
             convert_to_numpy=True
         )[0]
 
-    # backward compatibility
+    # Backward compatibility
 
     def encode(
         self,
