@@ -42,13 +42,8 @@ class JSONLogger:
 
             f.write("\n")
 
-    # --------------------------------------------------
-    # INFO
-    # --------------------------------------------------
-
     def info(
         self,
-        category: str,
         message: str,
         **kwargs
     ):
@@ -57,19 +52,13 @@ class JSONLogger:
             "application",
             {
                 "level": "INFO",
-                "category": category,
                 "message": message,
                 **kwargs
             }
         )
 
-    # --------------------------------------------------
-    # ERROR
-    # --------------------------------------------------
-
     def error(
         self,
-        category: str,
         message: str,
         exception=None,
         **kwargs
@@ -79,7 +68,6 @@ class JSONLogger:
             "application",
             {
                 "level": "ERROR",
-                "category": category,
                 "message": message,
                 "exception": str(exception) if exception else None,
                 "traceback": traceback.format_exc() if exception else None,
